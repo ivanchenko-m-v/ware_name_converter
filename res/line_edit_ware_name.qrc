@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/"/>
+    <qresource prefix="/text">
+        <file>symbols.txt</file>
+        <file>symbols_exchange.txt</file>
+    </qresource>
+</RCC>
