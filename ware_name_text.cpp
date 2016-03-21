@@ -2,11 +2,12 @@
 /// ============================================================================
 ///		Author		: M. Ivanchenko
 ///		Date create	: 18-03-2016
-///		Date update	: 18-03-2016
+///		Date update	: 21-03-2016
 ///		Comment		:
 /// ============================================================================
 
 #include "ware_name_text.h"
+#include "ware_name_converter.h"
 #include <QRegExp>
 
 namespace rele_auto
@@ -58,6 +59,11 @@ namespace rele_auto
 		QString tmp_s = this->toUpper( );
 		this->swap( tmp_s );
 		//замена схожей кириллицы на латиницу
+		tmp_s = the_ware_symbol_replacer( ).replace( *this );
+		this->swap( tmp_s );
+		//замена специальных комбинаций
+		tmp_s = the_ware_symbol_replacer( ).replace_spec( *this );
+		this->swap( tmp_s );
 	}
 
     /// ------------------------------------------------------------------------
