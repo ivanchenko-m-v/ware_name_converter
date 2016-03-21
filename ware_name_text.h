@@ -39,7 +39,7 @@ namespace rele_auto
 		void prepare_3( );
 		bool prepare_33H( );
 		bool prepare_3v( );
-		bool prepare_d3t( );
+		bool prepare_D3T( );
 		bool prepare_1_3( );
 		bool prepare_A3( );
 

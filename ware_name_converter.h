@@ -2,7 +2,7 @@
 /// ============================================================================
 ///		Author		: M. Ivanchenko
 ///		Date create	: 23-03-2015
-///		Date update	: 25-03-2015
+///		Date update	: 25-03-2015; 21-03-2016
 ///		Comment		:
 /// ============================================================================
 #ifndef __WARE_NAME_CONVERTER_H__
@@ -13,6 +13,7 @@
 namespace rele_auto
 {
 	typedef QHash<QChar, QChar> ware_symbol_replace_table;
+	typedef QHash<QChar, QString> ware_specsymbol_replace_table;
 /// ############################################################################
 ///			class ware_symbol_replacer
 /// ############################################################################
@@ -39,8 +40,16 @@ namespace rele_auto
     private:
         /// --------------------------------------------------------------------
 		void initialize( );
+        /// --------------------------------------------------------------------
+		void init_letters_table( );
+        /// --------------------------------------------------------------------
+		void init_spec_table( );
 
 	public:
+        /// --------------------------------------------------------------------
+		QString replace( const QString &s ) const;
+        /// --------------------------------------------------------------------
+		QString replace_spec( const QString &s ) const;
 
     /// ========================================================================
     ///		OPERATORS
@@ -59,10 +68,13 @@ namespace rele_auto
 		//разделитель слогов
 		const QChar _SYLLABLE_DELIMETER_ = ':';
 
-    private:
+	private:
 		//хэш-таблица замены символов:
 		//key - символ для замены, value - подстановочный символ
-		ware_symbol_replace_table	_symbols_table;
+		ware_symbol_replace_table	_letters_table;
+		//хэш-таблица замены специальных символов:
+		//key - символ для замены, value - подстановочный символ
+		ware_specsymbol_replace_table	_spec_table;
 
 	};//class ware_symbol_replacer
 

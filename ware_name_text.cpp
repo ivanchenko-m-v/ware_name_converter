@@ -54,6 +54,10 @@ namespace rele_auto
 	{
 		//варианты с русской 'З'
 		this->prepare_3( );
+		//переводим строку в верхний регистр
+		QString tmp_s = this->toUpper( );
+		this->swap( tmp_s );
+		//замена схожей кириллицы на латиницу
 	}
 
     /// ------------------------------------------------------------------------
@@ -68,27 +72,28 @@ namespace rele_auto
 		{
 			return;
 		}
-		//сочетание русских 'ЗЗ'
+		//сочетание русских 'ЗЗ' перед 'Н' или 'П' (ЗЗН,ЗЗП)
 		if( this->prepare_33H( ) )
 		{
 		}
+		//сочетание русских 'Зв'итд
 		else if( this->prepare_3v( ) )
 		{
 		}
-		else if( this->prepare_d3t( ) )
+		//сочетание 'ДЗТ'итд
+		else if( this->prepare_D3T( ) )
 		{
 		}
+		//сочетание '1"З"'итд
 		else if( this->prepare_1_3( ) )
 		{
 		}
+		//сочетание 'Э[AА]З'
 		else if( this->prepare_A3( ) )
 		{
 		}
-		else
-		{
-			//в остальных случаях замена русской 'З' на тройку
-			this->replace( rx3, "3" );
-		}
+		//в остальных случаях замена русской 'З' на тройку
+		this->replace( rx3, "3" );
 	}
 
     /// ------------------------------------------------------------------------
@@ -96,8 +101,8 @@ namespace rele_auto
     /// ------------------------------------------------------------------------
 	bool ware_name_text::prepare_33H( )
 	{
-		//сочетание русских 'ЗЗ'
-		QRegExp rx33H( "ЗЗ(?=[HНП]])", Qt::CaseSensitive, QRegExp::RegExp2 );
+		//сочетание русских 'ЗЗ' перед 'Н' или 'П' (ЗЗН,ЗЗП)
+		QRegExp rx33H( "ЗЗ(?=[HНП])", Qt::CaseSensitive, QRegExp::RegExp2 );
 		int pos = rx33H.indexIn( *this );
 		if( pos == -1 )
 		{
@@ -110,34 +115,74 @@ namespace rele_auto
 	}
 
     /// ------------------------------------------------------------------------
-	///	prepare_33H( )
+	///	prepare_3v( )
     /// ------------------------------------------------------------------------
 	bool ware_name_text::prepare_3v( )
 	{
+		//сочетание русских 'Зв'итд
+		QRegExp rx3v( "З(?=[авНH])", Qt::CaseSensitive, QRegExp::RegExp2 );
+		int pos = rx3v.indexIn( *this );
+		if( pos == -1 )
+		{
+			return false;
+		}
+		//если найдено, меняем на маленькие 'з'
+		this->replace( rx3v, "з" );
+
 		return true;
 	}
 
     /// ------------------------------------------------------------------------
-	///	prepare_33H( )
+	///	prepare_D3T( )
     /// ------------------------------------------------------------------------
-	bool ware_name_text::prepare_d3t( )
+	bool ware_name_text::prepare_D3T( )
 	{
+		//сочетание 'ДЗТ'
+		QRegExp rxD3T( "ДЗ[ТT]", Qt::CaseSensitive, QRegExp::RegExp2 );
+		int pos = rxD3T.indexIn( *this );
+		if( pos == -1 )
+		{
+			return false;
+		}
+		//если найдено, меняем на маленькие 'з'
+		this->replace( rxD3T, "ДзТ" );
+
 		return true;
 	}
 
     /// ------------------------------------------------------------------------
-	///	prepare_33H( )
+	///	prepare_1_3( )
     /// ------------------------------------------------------------------------
 	bool ware_name_text::prepare_1_3( )
 	{
+		//сочетание '1"З"'итд
+		QRegExp rx1_3( "(?<=[1-9])[\"'«]?З", Qt::CaseSensitive, QRegExp::RegExp2 );
+		int pos = rx1_3.indexIn( *this );
+		if( pos == -1 )
+		{
+			return false;
+		}
+		//если найдено, меняем на маленькие 'з'
+		this->replace( rx1_3, "з" );
+
 		return true;
 	}
 
     /// ------------------------------------------------------------------------
-	///	prepare_33H( )
+	///	prepare_A3( )
     /// ------------------------------------------------------------------------
 	bool ware_name_text::prepare_A3( )
 	{
+		//сочетание 'Э[AА]З'
+		QRegExp rxA3( "Э[AА]З", Qt::CaseSensitive, QRegExp::RegExp2 );
+		int pos = rxA3.indexIn( *this );
+		if( pos == -1 )
+		{
+			return false;
+		}
+		//если найдено, меняем на маленькие 'ЭАз'
+		this->replace( rxA3, "ЭАз" );
+
 		return true;
 	}
 
