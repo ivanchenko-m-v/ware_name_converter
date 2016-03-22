@@ -10,6 +10,7 @@
 
 #include "line_edit_ware_name.h"
 #include "ware_name_converter.h"
+#include "ware_name_text.h"
 
 namespace rele_auto
 {
@@ -53,8 +54,11 @@ namespace rele_auto
 		int n_key = event->key( );
 		if( n_key == Qt::Key_Enter || n_key == Qt::Key_Return )
 		{
-			QString text{this->text( )};
-			QMessageBox::information( 0,"replacer", the_ware_name_converter().convert(text) );
+			//QString text{this->text( )};
+			//QMessageBox::information( 0,"replacer", the_ware_name_converter().convert(text) );
+
+			ware_name_text text{this->text( )};
+			QMessageBox::information( 0,"replacer", text );
 		}
 	}
 

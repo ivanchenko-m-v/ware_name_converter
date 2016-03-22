@@ -17,12 +17,10 @@ TEMPLATE = app
 SOURCES += main.cpp\
         dialog_ware_name.cpp \
     line_edit_ware_name.cpp \
-    ware_name_converter.cpp \
     ware_name_text.cpp
 
 HEADERS  += dialog_ware_name.h \
     line_edit_ware_name.h \
-    ware_name_converter.h \
     ware_name_text.h
 
 RESOURCES +=
