@@ -2,7 +2,7 @@
 /// ============================================================================
 ///		Author		: M. Ivanchenko
 ///		Date create	: 18-03-2016
-///		Date update	: 22-03-2016
+///		Date update	: 23-03-2016
 ///		Comment		:
 /// ============================================================================
 #ifndef __WARE_NAME_TEXT_H__
@@ -53,6 +53,11 @@ namespace rele_auto
 		void replace_letters( );
 		void replace_spec( );
 		void replace_not_alnum( );
+		void insert_syllable_delimeters( );
+		void insert_syllable_notnum_num( );
+		void insert_syllable_num_notnum( );
+		void cut_extra_delimeters( );
+		void cut_syllable_length( );
 
 	public:
 
@@ -75,7 +80,9 @@ namespace rele_auto
     /// ========================================================================
     ///			FIELDS
     /// ========================================================================
-    private:
+	private:
+		const int MAX_SYLLABLE_LEN = 6;
+
 		//хэш-таблица замены символов:
 		//key - символ для замены, value - подстановочный символ
 		ware_symbol_replace_table	_letters_table;

@@ -2,7 +2,7 @@
 /// ============================================================================
 ///		Author		: M. Ivanchenko
 ///		Date create	: 18-03-2016
-///		Date update	: 21-03-2016
+///		Date update	: 23-03-2016
 ///		Comment		:
 /// ============================================================================
 
@@ -126,6 +126,12 @@ namespace rele_auto
 		this->replace_spec( );
 		//замена небуквоцифр
 		this->replace_not_alnum( );
+		//разделение по "слогам"
+		this->insert_syllable_delimeters( );
+		//удаление лишних разделителей
+		this->cut_extra_delimeters( );
+		//уменьшить длину слога до MAX=6
+		this->cut_syllable_length( );
 	}
 
     /// ------------------------------------------------------------------------
@@ -224,14 +230,14 @@ namespace rele_auto
 	bool ware_name_text::prepare_1_3( )
 	{
 		//сочетание '1"З"'итд
-		QRegExp rx1_3( QString::fromStdWString( L"(?<=[1-9])[\"'«]?З" ), Qt::CaseSensitive, QRegExp::RegExp2 );
+		QRegExp rx1_3( QString::fromStdWString( L"([1-9])[\"'«]?З" ), Qt::CaseSensitive, QRegExp::RegExp2 );
 		int pos = rx1_3.indexIn( *this );
 		if( pos == -1 )
 		{
 			return false;
 		}
 		//если найдено, меняем на маленькие 'з'
-		this->replace( rx1_3, QString::fromStdWString( L"з" ) );
+		this->replace( rx1_3, QString::fromStdWString( L"\\1з" ) );
 
 		return true;
 	}
@@ -261,12 +267,9 @@ namespace rele_auto
 	{
 		for( QChar &symbol : *this )
 		{
-			if( symbol.isLetter( ) )
+			if( symbol.isLetter( ) && this->_letters_table.contains( symbol ) )
 			{
-				if( this->_letters_table.contains( symbol ) )
-				{
-					symbol = this->_letters_table[symbol];
-				}
+				symbol = this->_letters_table[symbol];
 			}
 		}
 	}
@@ -277,15 +280,10 @@ namespace rele_auto
 	void ware_name_text::replace_spec( )
 	{
 		QRegExp rx( QString::fromStdWString( L"([1-9])[\"'«]?([PЗ])" ), Qt::CaseSensitive, QRegExp::RegExp2 );
-		int pos = rx.indexIn( *this );
-		while( pos != -1 )
+		int pos = -1;
+		while( (pos = rx.indexIn( *this ))!= -1 )
 		{
-			QString cap1{rx.cap(1)};
-			QString cap2{rx.cap(2)};
-			QString xchng_str = this->_spec_table[cap1[0]] + this->_spec_table[cap2[0]];
-			this->replace( pos, rx.matchedLength( ), xchng_str );
-
-			pos = rx.indexIn( *this );
+			this->replace( pos, rx.matchedLength( ), this->_spec_table[rx.cap(1)[0]] + this->_spec_table[rx.cap(2)[0]] + ":" );
 		}
 	}
 
@@ -298,6 +296,80 @@ namespace rele_auto
 		this->replace( rx, QString::fromStdWString( L":" ) );
 	}
 
+    /// ------------------------------------------------------------------------
+	///	insert_syllable_delimeters( )
+    /// ------------------------------------------------------------------------
+	void ware_name_text::insert_syllable_delimeters( )
+	{
+		//вставляем разделитель в последовательность буквы-цифры
+		this->insert_syllable_notnum_num( );
+		//вставляем разделитель в последовательность цифры-буквы
+		this->insert_syllable_num_notnum( );
+	}
+
+    /// ------------------------------------------------------------------------
+	///	insert_syllable_notnum_num( )
+    /// ------------------------------------------------------------------------
+	void ware_name_text::insert_syllable_notnum_num( )
+	{
+		QRegExp rx( QString::fromStdWString( L"(\\D+)(?=\\d+)" ), Qt::CaseSensitive, QRegExp::RegExp2 );
+		if( rx.indexIn(*this) != -1 )
+		{
+			this->replace( rx, "\\1:" );
+		}
+	}
+
+    /// ------------------------------------------------------------------------
+	///	insert_syllable_num_notnum( )
+    /// ------------------------------------------------------------------------
+	void ware_name_text::insert_syllable_num_notnum( )
+	{
+		QRegExp rx( QString::fromStdWString( L"(\\d+)(?=\\D+)" ), Qt::CaseSensitive, QRegExp::RegExp2 );
+		if( rx.indexIn(*this) != -1 )
+		{
+			this->replace( rx, "\\1:"  );
+		}
+	}
+
+    /// ------------------------------------------------------------------------
+	///	cut_extra_delimeters( )
+    /// ------------------------------------------------------------------------
+	void ware_name_text::cut_extra_delimeters( )
+	{
+		QRegExp rx( QString::fromStdWString( L"[:]+" ), Qt::CaseSensitive, QRegExp::RegExp2 );
+		if( rx.indexIn(*this) != -1 )
+		{
+			this->replace( rx, ":"  );
+		}
+		if( this->startsWith(':') )
+		{
+			//удаляем, если в начале стоит разделитель
+			this->remove( 0, 1 );
+		}
+		if( this->endsWith(':') )
+		{
+			//удаляем, если в конце стоит разделитель
+			this->remove( this->length( )-1, 1 );
+		}
+	}
+
+    /// ------------------------------------------------------------------------
+	///	cut_syllable_length( )
+    /// ------------------------------------------------------------------------
+	void ware_name_text::cut_syllable_length( )
+	{
+		//([^:]{7,}) - недвоеточие повторяющееся не менее 7и(или (MAX_SYLLABLE_LEN+1)) раз
+		QRegExp rx( QString::fromStdWString( L"([^:]{" +
+											QString::number(this->MAX_SYLLABLE_LEN + 1).toStdWString( ) +
+											L",})" ), Qt::CaseSensitive, QRegExp::RegExp2
+										   );
+		int pos = -1;
+		while( (pos = rx.indexIn( *this ))!= -1 )
+		{
+			//уменьшить длину слога до MAX=6
+			this->replace( pos, rx.matchedLength( ), rx.cap(1).left(this->MAX_SYLLABLE_LEN) );
+		}
+	}
 
 /// ############################################################################
 }//namespace rele_auto
