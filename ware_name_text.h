@@ -2,7 +2,7 @@
 /// ============================================================================
 ///		Author		: M. Ivanchenko
 ///		Date create	: 18-03-2016
-///		Date update	: 23-03-2016
+///		Date update	: 24-03-2016
 ///		Comment		:
 /// ============================================================================
 #ifndef __WARE_NAME_TEXT_H__
@@ -58,15 +58,37 @@ namespace rele_auto
 		void insert_syllable_num_notnum( );
 		void cut_extra_delimeters( );
 		void cut_syllable_length( );
+		void remove_duplicates( );
 
 	public:
 
     /// ========================================================================
     ///		PROPERTIES
     /// ========================================================================
-    private:
-
 	public:
+        /// --------------------------------------------------------------------
+        /// max_syllable_length
+        /// --------------------------------------------------------------------
+		int max_syllable_length( ) const
+		{
+			return this->_MAX_SYLLABLE_LEN;
+		}
+		void max_syllable_length( const int &syllable_length )\
+		{
+			this->_MAX_SYLLABLE_LEN = syllable_length;
+		}
+        /// --------------------------------------------------------------------
+        /// syllable_delimeter
+        /// --------------------------------------------------------------------
+		QChar syllable_delimeter( ) const
+		{
+			return this->_SYLLABLE_DELIMETER;
+		}
+		void syllable_delimeter( const QChar &delimeter )\
+		{
+			this->_SYLLABLE_DELIMETER = delimeter;
+		}
+
 
     /// ========================================================================
     ///		OPERATORS
@@ -81,7 +103,8 @@ namespace rele_auto
     ///			FIELDS
     /// ========================================================================
 	private:
-		const int MAX_SYLLABLE_LEN = 6;
+		int		_MAX_SYLLABLE_LEN = 6;
+		QChar	_SYLLABLE_DELIMETER = ':';
 
 		//хэш-таблица замены символов:
 		//key - символ для замены, value - подстановочный символ

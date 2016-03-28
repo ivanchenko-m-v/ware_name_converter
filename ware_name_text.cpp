@@ -1,13 +1,13 @@
+
 /// $Header
 /// ============================================================================
 ///		Author		: M. Ivanchenko
 ///		Date create	: 18-03-2016
-///		Date update	: 23-03-2016
+///		Date update	: 28-03-2016
 ///		Comment		:
 /// ============================================================================
 
 #include "ware_name_text.h"
-#include "ware_name_converter.h"
 #include <QRegExp>
 
 namespace rele_auto
@@ -118,7 +118,7 @@ namespace rele_auto
 		//варианты с русской 'З'
 		this->prepare_3( );
 		//переводим строку в верхний регистр
-		QString tmp_s = this->toUpper( );
+		QString tmp_s{this->toUpper( )};
 		this->swap( tmp_s );
 		//замена схожей кириллицы на латиницу
 		this->replace_letters( );
@@ -132,6 +132,8 @@ namespace rele_auto
 		this->cut_extra_delimeters( );
 		//уменьшить длину слога до MAX=6
 		this->cut_syllable_length( );
+		//удалить дубликаты слогов
+		this->remove_duplicates( );
 	}
 
     /// ------------------------------------------------------------------------
@@ -293,7 +295,7 @@ namespace rele_auto
 	void ware_name_text::replace_not_alnum( )
 	{
 		QRegExp rx( QString::fromStdWString( L"\\W+" ), Qt::CaseSensitive, QRegExp::RegExp2 );
-		this->replace( rx, QString::fromStdWString( L":" ) );
+		this->replace( rx, this->_SYLLABLE_DELIMETER );
 	}
 
     /// ------------------------------------------------------------------------
@@ -315,7 +317,8 @@ namespace rele_auto
 		QRegExp rx( QString::fromStdWString( L"(\\D+)(?=\\d+)" ), Qt::CaseSensitive, QRegExp::RegExp2 );
 		if( rx.indexIn(*this) != -1 )
 		{
-			this->replace( rx, "\\1:" );
+			//вставляем разделитель между последовательностью нецифр и цифр
+			this->replace( rx, QString("\\1") + this->_SYLLABLE_DELIMETER );
 		}
 	}
 
@@ -327,7 +330,8 @@ namespace rele_auto
 		QRegExp rx( QString::fromStdWString( L"(\\d+)(?=\\D+)" ), Qt::CaseSensitive, QRegExp::RegExp2 );
 		if( rx.indexIn(*this) != -1 )
 		{
-			this->replace( rx, "\\1:"  );
+			//вставляем разделитель между последовательностью цифр и нецифр
+			this->replace( rx, QString("\\1") + this->_SYLLABLE_DELIMETER  );
 		}
 	}
 
@@ -336,17 +340,20 @@ namespace rele_auto
     /// ------------------------------------------------------------------------
 	void ware_name_text::cut_extra_delimeters( )
 	{
-		QRegExp rx( QString::fromStdWString( L"[:]+" ), Qt::CaseSensitive, QRegExp::RegExp2 );
+		QRegExp rx(
+					QString::fromStdWString( L"[" + QString(this->_SYLLABLE_DELIMETER).toStdWString( ) + L"]+" ),
+											 Qt::CaseSensitive, QRegExp::RegExp2
+										   );
 		if( rx.indexIn(*this) != -1 )
 		{
-			this->replace( rx, ":"  );
+			this->replace( rx, QString( this->_SYLLABLE_DELIMETER ) );
 		}
-		if( this->startsWith(':') )
+		if( this->startsWith(this->_SYLLABLE_DELIMETER) )
 		{
 			//удаляем, если в начале стоит разделитель
 			this->remove( 0, 1 );
 		}
-		if( this->endsWith(':') )
+		if( this->endsWith(this->_SYLLABLE_DELIMETER) )
 		{
 			//удаляем, если в конце стоит разделитель
 			this->remove( this->length( )-1, 1 );
@@ -358,16 +365,40 @@ namespace rele_auto
     /// ------------------------------------------------------------------------
 	void ware_name_text::cut_syllable_length( )
 	{
+		QString rgx_pattern_begin{"([^" + QString(this->_SYLLABLE_DELIMETER) + "]{"};
+		QString rgx_pattern_end{",})"};
 		//([^:]{7,}) - недвоеточие повторяющееся не менее 7и(или (MAX_SYLLABLE_LEN+1)) раз
-		QRegExp rx( QString::fromStdWString( L"([^:]{" +
-											QString::number(this->MAX_SYLLABLE_LEN + 1).toStdWString( ) +
-											L",})" ), Qt::CaseSensitive, QRegExp::RegExp2
+		QRegExp rx( QString::fromStdWString( rgx_pattern_begin.toStdWString( ) +
+											QString::number(this->_MAX_SYLLABLE_LEN + 1).toStdWString( ) +
+											rgx_pattern_end.toStdWString( ) ), Qt::CaseSensitive, QRegExp::RegExp2
 										   );
 		int pos = -1;
 		while( (pos = rx.indexIn( *this ))!= -1 )
 		{
 			//уменьшить длину слога до MAX=6
-			this->replace( pos, rx.matchedLength( ), rx.cap(1).left(this->MAX_SYLLABLE_LEN) );
+			this->replace( pos, rx.matchedLength( ), rx.cap(1).left(this->_MAX_SYLLABLE_LEN) );
+		}
+	}
+
+    /// ------------------------------------------------------------------------
+	///	remove_duplicates( )
+    /// ------------------------------------------------------------------------
+	void ware_name_text::remove_duplicates( )
+	{
+		QStringList list_syl = this->split( this->_SYLLABLE_DELIMETER );
+		list_syl.removeDuplicates( );
+
+		//собираем строку без дубликатов
+		this->clear( );
+		for( QString syl :list_syl )
+		{
+			this->append( syl );
+			this->append( this->_SYLLABLE_DELIMETER );
+		}
+		if( this->endsWith(this->_SYLLABLE_DELIMETER) )
+		{
+			//удаляем разделитель в конце
+			this->remove( this->length( )-1, 1 );
 		}
 	}
 
