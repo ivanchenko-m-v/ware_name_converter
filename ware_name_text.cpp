@@ -3,7 +3,7 @@
 /// ============================================================================
 ///		Author		: M. Ivanchenko
 ///		Date create	: 18-03-2016
-///		Date update	: 28-03-2016
+///		Date update	: 14-04-2016
 ///		Comment		:
 /// ============================================================================
 
@@ -200,7 +200,7 @@ namespace rele_auto
 		int pos = rx3v.indexIn( *this );
 		if( pos == -1 )
 		{
-			return false;
+			return false;Console
 		}
 		//если найдено, меняем на маленькие 'з'
 		this->replace( rx3v, QString::fromStdWString( L"з" ) );
@@ -368,9 +368,13 @@ namespace rele_auto
 		QString rgx_pattern_begin{"([^" + QString(this->_SYLLABLE_DELIMETER) + "]{"};
 		QString rgx_pattern_end{",})"};
 		//([^:]{7,}) - недвоеточие повторяющееся не менее 7и(или (MAX_SYLLABLE_LEN+1)) раз
-		QRegExp rx( QString::fromStdWString( rgx_pattern_begin.toStdWString( ) +
-											QString::number(this->_MAX_SYLLABLE_LEN + 1).toStdWString( ) +
-											rgx_pattern_end.toStdWString( ) ), Qt::CaseSensitive, QRegExp::RegExp2
+		QRegExp rx( QString::fromStdWString(
+							rgx_pattern_begin.toStdWString( ) +
+							QString::number(
+											this->_MAX_SYLLABLE_LEN + 1).toStdWString( ) +
+											rgx_pattern_end.toStdWString( )
+										   ),
+							Qt::CaseSensitive, QRegExp::RegExp2
 										   );
 		int pos = -1;
 		while( (pos = rx.indexIn( *this ))!= -1 )
