@@ -200,7 +200,7 @@ namespace rele_auto
 		int pos = rx3v.indexIn( *this );
 		if( pos == -1 )
 		{
-			return false;Console
+			return false;
 		}
 		//если найдено, меняем на маленькие 'з'
 		this->replace( rx3v, QString::fromStdWString( L"з" ) );
